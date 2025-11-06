@@ -1,1 +1,2 @@
 https://github.com/alex8875/m3u/blob/main/jstar.m3u
+https://github.com/alex8875/m3u/blob/main/jcinema.m3u
