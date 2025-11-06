@@ -1,31 +1,135 @@
-
-name: Master Playlist
+name: Shivansh Master Playlist Builder
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
-  workflow_dispatch:     # You can trigger it manually too
+    - cron: '*/15 * * * *'   # Runs every 15 minutes
+  workflow_dispatch:         # Manual trigger option
+
+concurrency:
+  group: shivansh-m3u
+  cancel-in-progress: false   # Allow current run to finish safely
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10       # Prevent infinite hang
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Combine M3U files
+      - name: Build Shivansh.m3u (clean + sorted + channel count)
         run: |
-          echo "#EXTM3U" > combined.m3u
-          while read url; do
-            echo "\n# Begin: $url" >> combined.m3u
-            curl -s "$url" >> combined.m3u
-          done < sources.txt
+          timestamp=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S %Z")
+          tmpdir=$(mktemp -d)
+          trap 'rm -rf "$tmpdir"' EXIT
 
-      - name: Commit and push changes
+          echo "🔹 Starting M3U combination at $timestamp"
+
+          if [ ! -f Sources.txt ]; then
+            echo "❌ Sources.txt not found. Exiting."
+            exit 1
+          fi
+
+          grep -v '^$' Sources.txt > "$tmpdir/sources.txt"
+          if [ ! -s "$tmpdir/sources.txt" ]; then
+            echo "❌ Sources.txt is empty. Exiting."
+            exit 1
+          fi
+
+          echo "🌐 Fetching M3U sources..."
+
+          i=0
+          max_jobs=10
+          while read -r url; do
+            [[ -z "$url" ]] && continue
+            i=$((i+1))
+            {
+              if curl -fs "$url" | grep -v -E '^#EXTM3U|# Pushed and updated by|# Join Telegram' > "$tmpdir/part_$i.m3u"; then
+                echo "✅ Added: $url"
+              else
+                echo "⚠️ Failed: $url"
+                echo "# ⚠️ Failed to fetch: $url" > "$tmpdir/part_$i.m3u"
+              fi
+            } &
+            ((i % max_jobs == 0)) && wait
+          done < "$tmpdir/sources.txt"
+          wait
+
+          echo "✅ All sources fetched. Combining files..."
+          cat "$tmpdir"/part_*.m3u > "$tmpdir/combined.m3u"
+
+          # 🧹 Remove duplicates by URL
+          echo "🧹 Removing duplicate channels..."
+          awk '
+            /^#EXTINF/ {info=$0; next}
+            /^http/ {
+              url=$0
+              if (!seen[url]++) {
+                print info > "uniq_extinf.txt"
+                print url > "uniq_urls.txt"
+              }
+            }
+          ' "$tmpdir/combined.m3u"
+
+          paste -d'\n' uniq_extinf.txt uniq_urls.txt > "$tmpdir/cleaned.m3u"
+
+          # 🔤 Sort alphabetically by channel name
+          echo "🔤 Sorting channels alphabetically..."
+          awk '
+            /^#EXTINF/ {info=$0; getline url; print info "|" url}
+          ' "$tmpdir/cleaned.m3u" | sort -t',' -k2,2 | tr '|' '\n' > "$tmpdir/sorted.m3u"
+
+          # 🧮 Count total channels
+          total_channels=$(grep -c '^#EXTINF' "$tmpdir/sorted.m3u")
+
+          # 🧾 Build final Shivansh.m3u with header
+          {
+            echo '#EXTM3U billed-msg="Join our Telegram @ Shivanshplaylists"'
+            echo "# Pushed & Updated by : Shivansh"
+            echo "# Coded & Supported by: Kittujk"
+            echo "# Total Channels: $total_channels"
+            echo "# Last Updated: $timestamp"
+            echo "# Auto-Generated via GitHub Actions"
+            echo ""
+            cat "$tmpdir/sorted.m3u"
+          } > Shivansh.m3u
+
+          if [ ! -s Shivansh.m3u ]; then
+            echo "❌ Shivansh.m3u is empty after processing. Exiting."
+            exit 0
+          fi
+
+          echo "✅ Shivansh.m3u built successfully with $total_channels channels."
+
+      - name: Commit and push Shivansh.m3u
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add combined.m3u
-          git commit -m "Update combined.m3u" || echo "No changes to commit"
-          git push origin main
+          git add Shivansh.m3u
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto-update Shivansh.m3u ($total_channels channels)"
+            
+            git pull --rebase origin main || true
+
+            n=0
+            until [ "$n" -ge 3 ]
+            do
+              git push origin main && break
+              n=$((n+1))
+              echo "⚠️ Push failed, retrying in 10s... ($n/3)"
+              sleep 10
+            done
+          else
+            echo "No changes detected — skipping commit."
+          fi
+
+      - name: Summary
+        run: |
+          echo "✅ Shivansh.m3u updated at $(date)"
