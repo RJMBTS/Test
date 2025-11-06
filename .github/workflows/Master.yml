@@ -31,14 +31,14 @@ jobs:
 
           echo "🔹 Starting M3U combination at $timestamp"
 
-          if [ ! -f Sources.txt ]; then
-            echo "❌ Sources.txt not found. Exiting."
+          if [ ! -f sources.txt ]; then
+            echo "❌ sources.txt not found. Exiting."
             exit 1
           fi
 
-          grep -v '^$' Sources.txt > "$tmpdir/sources.txt"
+          grep -v '^$' sources.txt > "$tmpdir/sources.txt"
           if [ ! -s "$tmpdir/sources.txt" ]; then
-            echo "❌ Sources.txt is empty. Exiting."
+            echo "❌ sources.txt is empty. Exiting."
             exit 1
           fi
 
