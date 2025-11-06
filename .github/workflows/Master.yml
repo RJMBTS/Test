@@ -64,7 +64,7 @@ jobs:
           echo "✅ All sources fetched. Combining files..."
           cat "$tmpdir"/part_*.m3u > "$tmpdir/combined.m3u"
 
-          # 🧹 Remove duplicates by URL (fixed path issue)
+          # 🧹 Remove duplicates by URL
           echo "🧹 Removing duplicate channels..."
           awk -v extinf="$tmpdir/uniq_extinf.txt" -v urls="$tmpdir/uniq_urls.txt" '
             /^#EXTINF/ {info=$0; next}
@@ -111,14 +111,17 @@ jobs:
 
           echo "✅ Shivansh.m3u built successfully with $total_channels channels."
 
-          # 🧠 Write run summary log
+          # 🧠 Write or update run summary log safely
+          touch shivansh-log.txt
           echo "[$timestamp] ✅ Updated Shivansh.m3u — $total_channels channels" >> shivansh-log.txt
 
       - name: Commit and push Shivansh.m3u and log
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add Shivansh.m3u shivansh-log.txt
+          
+          # Safely stage files (ignore if log missing)
+          git add -f Shivansh.m3u shivansh-log.txt 2>/dev/null || true
           
           if ! git diff --cached --quiet; then
             git commit -m "Auto-update Shivansh.m3u ($total_channels channels)"
