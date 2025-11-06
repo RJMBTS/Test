@@ -95,7 +95,6 @@ jobs:
             echo "# Coded & Supported by: Kittujk"
             echo "# Total Channels: $total_channels"
             echo "# Last Updated: $timestamp"
-            echo "# Auto-Generated via GitHub Actions"
             echo ""
             cat "$tmpdir/sorted.m3u"
           } > Shivansh.m3u
