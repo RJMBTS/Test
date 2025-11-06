@@ -2,20 +2,12 @@ name: Shivansh Master Playlist Builder
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # Runs every 15 minutes
-  workflow_dispatch:         # Manual trigger option
-
-concurrency:
-  group: shivansh-m3u
-  cancel-in-progress: false   # Allow current run to finish safely
-
-permissions:
-  contents: write
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
+  workflow_dispatch:         # Allows manual trigger from GitHub
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10       # Prevent infinite hang
 
     steps:
       - name: Checkout repository
@@ -23,123 +15,58 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Shivansh.m3u (clean + sorted + channel count)
+      - name: Combine and clean M3U playlists with custom header
         run: |
-          timestamp=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S %Z")
-          tmpdir=$(mktemp -d)
-          trap 'rm -rf "$tmpdir"' EXIT
+          set -e
+          OUTPUT="Shivansh.m3u"
+          TEMP="temp_combined.m3u"
+          TEMP_CLEAN="temp_clean.m3u"
 
-          echo "🔹 Starting M3U combination at $timestamp"
+          echo "🔄 Fetching sources from sources.txt..."
 
-          if [ ! -f sources.txt ]; then
-            echo "❌ sources.txt not found. Exiting."
-            exit 1
-          fi
+          # Combine all M3U files
+          while IFS= read -r url; do
+            if [ -n "$url" ] && [[ "$url" == *.m3u* ]]; then
+              echo "# --- Begin: $url ---" >> "$TEMP"
+              curl -fsSL "$url" >> "$TEMP" || echo "# Failed to fetch: $url" >> "$TEMP"
+              echo "# --- End: $url ---" >> "$TEMP"
+              echo "" >> "$TEMP"
+            fi
+          done < sources.txt
 
-          grep -v '^$' sources.txt > "$tmpdir/sources.txt"
-          if [ ! -s "$tmpdir/sources.txt" ]; then
-            echo "❌ sources.txt is empty. Exiting."
-            exit 1
-          fi
+          echo "🧹 Removing duplicates..."
+          awk '!seen[$0]++' "$TEMP" > "$TEMP_CLEAN"
 
-          echo "🌐 Fetching M3U sources..."
+          # Count channels (count EXTINF lines)
+          TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TEMP_CLEAN" || echo "0")
 
-          i=0
-          max_jobs=10
-          while read -r url; do
-            [[ -z "$url" ]] && continue
-            i=$((i+1))
-            {
-              if curl -fs "$url" | grep -v -E '^#EXTM3U|# Pushed and updated by|# Join Telegram' > "$tmpdir/part_$i.m3u"; then
-                echo "✅ Added: $url"
-              else
-                echo "⚠️ Failed: $url"
-                echo "# ⚠️ Failed to fetch: $url" > "$tmpdir/part_$i.m3u"
-              fi
-            } &
-            ((i % max_jobs == 0)) && wait
-          done < "$tmpdir/sources.txt"
-          wait
+          # Get current date/time in IST
+          LAST_UPDATED=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
 
-          echo "✅ All sources fetched. Combining files..."
-          cat "$tmpdir"/part_*.m3u > "$tmpdir/combined.m3u"
-
-          # 🧹 Remove duplicates by URL
-          echo "🧹 Removing duplicate channels..."
-          awk -v extinf="$tmpdir/uniq_extinf.txt" -v urls="$tmpdir/uniq_urls.txt" '
-            /^#EXTINF/ {info=$0; next}
-            /^http/ {
-              url=$0
-              if (!seen[url]++) {
-                print info >> extinf
-                print url >> urls
-              }
-            }
-          ' "$tmpdir/combined.m3u"
-
-          if [ ! -s "$tmpdir/uniq_extinf.txt" ]; then
-            echo "❌ No valid channels found after duplicate removal."
-            exit 0
-          fi
-
-          paste -d'\n' "$tmpdir/uniq_extinf.txt" "$tmpdir/uniq_urls.txt" > "$tmpdir/cleaned.m3u"
-
-          # 🔤 Sort alphabetically by channel name
-          echo "🔤 Sorting channels alphabetically..."
-          awk '
-            /^#EXTINF/ {info=$0; getline url; print info "|" url}
-          ' "$tmpdir/cleaned.m3u" | sort -t',' -k2,2 | tr '|' '\n' > "$tmpdir/sorted.m3u"
-
-          # 🧮 Count total channels
-          total_channels=$(grep -c '^#EXTINF' "$tmpdir/sorted.m3u")
-
-          # 🧾 Build final Shivansh.m3u with header
+          echo "🧠 Building header and final file..."
           {
             echo '#EXTM3U billed-msg="Join our Telegram @ Shivanshplaylists"'
             echo "# Pushed & Updated by : Shivansh"
             echo "# Coded & Supported by: Kittujk"
-            echo "# Total Channels: $total_channels"
-            echo "# Last Updated: $timestamp"
+            echo "# Total Channels: $TOTAL_CHANNELS"
+            echo "# Last Updated: $LAST_UPDATED"
             echo ""
-            cat "$tmpdir/sorted.m3u"
-          } > Shivansh.m3u
+            cat "$TEMP_CLEAN"
+          } > "$OUTPUT"
 
-          if [ ! -s Shivansh.m3u ]; then
-            echo "❌ Shivansh.m3u is empty after processing. Exiting."
-            exit 0
-          fi
+          # Clean temp files
+          rm -f "$TEMP" "$TEMP_CLEAN"
 
-          echo "✅ Shivansh.m3u built successfully with $total_channels channels."
+          echo "✅ Final M3U file created: $OUTPUT"
+          echo "📺 Total Channels: $TOTAL_CHANNELS"
+          echo "🕒 Last Updated: $LAST_UPDATED"
 
-          # 🧠 Write or update run summary log safely
-          touch shivansh-log.txt
-          echo "[$timestamp] ✅ Updated Shivansh.m3u — $total_channels channels" >> shivansh-log.txt
-
-      - name: Commit and push Shivansh.m3u and log
+      - name: Commit and push updates
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          
-          # Safely stage files (ignore if log missing)
-          git add -f Shivansh.m3u shivansh-log.txt 2>/dev/null || true
-          
-          if ! git diff --cached --quiet; then
-            git commit -m "Auto-update Shivansh.m3u ($total_channels channels)"
-            
-            git pull --rebase origin main || true
-
-            n=0
-            until [ "$n" -ge 3 ]
-            do
-              git push origin main && break
-              n=$((n+1))
-              echo "⚠️ Push failed, retrying in 10s... ($n/3)"
-              sleep 10
-            done
-          else
-            echo "No changes detected — skipping commit."
-          fi
-
-      - name: Summary
-        run: |
-          echo "✅ Shivansh.m3u updated at $(date)"
+          git add Shivansh.m3u
+          git diff --quiet && echo "No changes to commit" || (
+            git commit -m "Auto-update Shivansh Master Playlist"
+            git push origin main
+          )
