@@ -1,0 +1,8 @@
+https://raw.githubusercontent.com/CodesRahul96/Live-TV/refs/heads/master/src/Assets/sony.json
+https://raw.githubusercontent.com/h4ck0v3rflow/m3u/refs/heads/main/sliv.m3u
+https://la.drmlive.net/tp/playlist
+https://raw.githubusercontent.com/clarityfork/m3u/refs/heads/main/Sonyliv.m3u
+https://raw.githubusercontent.com/geekyhimanshu/Khu/refs/heads/main/Zee%20Channel.m3u
+https://raw.githubusercontent.com/alex8875/m3u/refs/heads/main/jstar.m3u
+https://raw.githubusercontent.com/alex8875/m3u/refs/heads/main/z5.m3u
+https://raw.githubusercontent.com/clarityfork/m3u/refs/heads/main/Jiotv.m3u
