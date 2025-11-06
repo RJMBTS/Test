@@ -21,29 +21,59 @@ jobs:
           OUTPUT="Shivansh.m3u"
           TEMP="temp_combined.m3u"
           TEMP_CLEAN="temp_clean.m3u"
+          LOG_FILE="shivansh-log.txt"
 
-          echo "🔄 Fetching sources from sources.txt..."
+          echo "🔄 Starting Shivansh Master Playlist Builder..."
+          echo "Run started at: $(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')" > "$LOG_FILE"
 
-          # Combine all M3U files
+          # Ensure sources.txt exists
+          if [ ! -f sources.txt ]; then
+            echo "❌ sources.txt not found!" | tee -a "$LOG_FILE"
+            echo "#EXTM3U billed-msg=\"Join our Telegram @ Shivanshplaylists\"" > "$OUTPUT"
+            echo "# No sources found." >> "$OUTPUT"
+            exit 0
+          fi
+
+          echo "#EXTM3U" > "$TEMP"
+
+          echo "🔍 Reading URLs from sources.txt..." | tee -a "$LOG_FILE"
           while IFS= read -r url; do
-            if [ -n "$url" ] && [[ "$url" == *.m3u* ]]; then
-              echo "# --- Begin: $url ---" >> "$TEMP"
-              curl -fsSL "$url" >> "$TEMP" || echo "# Failed to fetch: $url" >> "$TEMP"
-              echo "# --- End: $url ---" >> "$TEMP"
-              echo "" >> "$TEMP"
+            if [ -z "$url" ]; then
+              continue
+            fi
+            if [[ "$url" == *.m3u* ]]; then
+              echo "▶️ Fetching: $url" | tee -a "$LOG_FILE"
+              {
+                echo ""
+                echo "# --- Begin: $url ---"
+                if curl -fsSL --max-time 30 "$url" >> "$TEMP"; then
+                  echo "✅ Success: $url" | tee -a "$LOG_FILE"
+                else
+                  echo "# Failed to fetch: $url" >> "$TEMP"
+                  echo "❌ Failed: $url" | tee -a "$LOG_FILE"
+                fi
+                echo "# --- End: $url ---"
+              } >> "$TEMP"
+            else
+              echo "⚠️ Skipping non-M3U URL: $url" | tee -a "$LOG_FILE"
             fi
           done < sources.txt
+
+          # If no playlist data fetched, still create a valid M3U
+          if ! grep -q "#EXTINF" "$TEMP"; then
+            echo "⚠️ No valid channels found. Creating empty playlist." | tee -a "$LOG_FILE"
+            echo "#EXTM3U billed-msg=\"Join our Telegram @ Shivanshplaylists\"" > "$OUTPUT"
+            echo "# No channels fetched from provided sources." >> "$OUTPUT"
+            exit 0
+          fi
 
           echo "🧹 Removing duplicates..."
           awk '!seen[$0]++' "$TEMP" > "$TEMP_CLEAN"
 
-          # Count channels (count EXTINF lines)
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TEMP_CLEAN" || echo "0")
-
-          # Get current date/time in IST
           LAST_UPDATED=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
 
-          echo "🧠 Building header and final file..."
+          echo "🧠 Writing final file header..."
           {
             echo '#EXTM3U billed-msg="Join our Telegram @ Shivanshplaylists"'
             echo "# Pushed & Updated by : Shivansh"
@@ -54,18 +84,18 @@ jobs:
             cat "$TEMP_CLEAN"
           } > "$OUTPUT"
 
-          # Clean temp files
-          rm -f "$TEMP" "$TEMP_CLEAN"
-
-          echo "✅ Final M3U file created: $OUTPUT"
+          echo "✅ Playlist built successfully: $OUTPUT"
           echo "📺 Total Channels: $TOTAL_CHANNELS"
           echo "🕒 Last Updated: $LAST_UPDATED"
+          echo "✅ Log saved to $LOG_FILE"
+
+          rm -f "$TEMP" "$TEMP_CLEAN"
 
       - name: Commit and push updates
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add Shivansh.m3u
+          git add Shivansh.m3u shivansh-log.txt
           git diff --quiet && echo "No changes to commit" || (
             git commit -m "Auto-update Shivansh Master Playlist"
             git push origin main
