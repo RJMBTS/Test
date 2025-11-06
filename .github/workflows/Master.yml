@@ -64,20 +64,25 @@ jobs:
           echo "✅ All sources fetched. Combining files..."
           cat "$tmpdir"/part_*.m3u > "$tmpdir/combined.m3u"
 
-          # 🧹 Remove duplicates by URL
+          # 🧹 Remove duplicates by URL (fixed path issue)
           echo "🧹 Removing duplicate channels..."
-          awk '
+          awk -v extinf="$tmpdir/uniq_extinf.txt" -v urls="$tmpdir/uniq_urls.txt" '
             /^#EXTINF/ {info=$0; next}
             /^http/ {
               url=$0
               if (!seen[url]++) {
-                print info > "uniq_extinf.txt"
-                print url > "uniq_urls.txt"
+                print info >> extinf
+                print url >> urls
               }
             }
           ' "$tmpdir/combined.m3u"
 
-          paste -d'\n' uniq_extinf.txt uniq_urls.txt > "$tmpdir/cleaned.m3u"
+          if [ ! -s "$tmpdir/uniq_extinf.txt" ]; then
+            echo "❌ No valid channels found after duplicate removal."
+            exit 0
+          fi
+
+          paste -d'\n' "$tmpdir/uniq_extinf.txt" "$tmpdir/uniq_urls.txt" > "$tmpdir/cleaned.m3u"
 
           # 🔤 Sort alphabetically by channel name
           echo "🔤 Sorting channels alphabetically..."
@@ -106,11 +111,14 @@ jobs:
 
           echo "✅ Shivansh.m3u built successfully with $total_channels channels."
 
-      - name: Commit and push Shivansh.m3u
+          # 🧠 Write run summary log
+          echo "[$timestamp] ✅ Updated Shivansh.m3u — $total_channels channels" >> shivansh-log.txt
+
+      - name: Commit and push Shivansh.m3u and log
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add Shivansh.m3u
+          git add Shivansh.m3u shivansh-log.txt
           
           if ! git diff --cached --quiet; then
             git commit -m "Auto-update Shivansh.m3u ($total_channels channels)"
