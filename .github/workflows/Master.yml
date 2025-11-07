@@ -2,12 +2,12 @@ name: Shivansh Master Playlist
 
 on:
   schedule:
-    - cron: '*/15 * * * *'   # Runs every 15 minutes
-  workflow_dispatch:         # Manual trigger
+    - cron: "*/15 * * * *"   # Runs every 15 minutes
+  workflow_dispatch:          # Manual trigger
 
 concurrency:
   group: shivansh-m3u
-  cancel-in-progress: true   # Avoid overlapping runs
+  cancel-in-progress: true    # Avoid overlapping runs
 
 jobs:
   build:
@@ -22,21 +22,18 @@ jobs:
       - name: Combine M3U files
         shell: bash
         run: |
-          # Generate dynamic timestamp (IST)
           TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
 
-          # Write header with Shivansh branding
-          cat << 'EOF' > Shivansh.m3u
-#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"
-# Pushed and Updated by Shivansh
-# Coded & Scripted by Kittujk
-# Last updated: $TIME_IST
-EOF
+          {
+            echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
+            echo '# Pushed and Updated by Shivansh'
+            echo '# Coded & Scripted by Kittujk'
+            echo "# Last updated: $TIME_IST"
+          } > Shivansh.m3u
 
-          # Combine all M3U sources
           while IFS= read -r url; do
-            url="${url%%#*}"                       # Remove inline comments
-            url="$(echo -n "$url" | tr -d '\r')"   # Remove carriage returns
+            url="${url%%#*}"
+            url="$(echo -n "$url" | tr -d '\r')"
             if [ -n "$url" ]; then
               echo -e "\n# ---- Begin: $url ----" >> Shivansh.m3u
               curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> Shivansh.m3u \
@@ -45,25 +42,20 @@ EOF
             fi
           done < sources.txt
 
-          # Add branded footer
           echo "# ---- Created Exclusively for Shivansh Playlists ----" >> Shivansh.m3u
 
-      - name: Show output size (diagnostic)
-        shell: bash
-        run: |
-          echo "✅ Generated file:"
-          ls -lh Shivansh.m3u || true
+      - name: Show output size
+        run: ls -lh Shivansh.m3u || true
 
       - name: Commit and push changes
+        shell: bash
         env:
           GIT_AUTHOR_NAME: "GitHub Actions Bot"
           GIT_AUTHOR_EMAIL: "actions@github.com"
-        shell: bash
         run: |
           git config user.name "$GIT_AUTHOR_NAME"
           git config user.email "$GIT_AUTHOR_EMAIL"
           git add Shivansh.m3u
-          # Commit only if file changed
           if ! git diff --quiet --cached; then
             git commit -m "Auto-update Shivansh.m3u"
             git push origin HEAD:main
