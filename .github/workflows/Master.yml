@@ -28,7 +28,7 @@ jobs:
         run: |
           TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
 
-          # Create temporary working file
+          # Temporary working file
           TMP_FILE="Shivansh_temp.m3u"
           > "$TMP_FILE"
 
@@ -46,22 +46,21 @@ jobs:
             fi
           done < sources.txt
 
-          # Count total and unique channels
+          # Count total and updated channels
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
           UPDATED_CHANNELS=$TOTAL_CHANNELS
 
-          # ✅ Write header with total + updated counts
+          # ✅ Header with “Entire”
           {
             echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
             echo '# Pushed and Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
-            echo "# Total Channels: $TOTAL_CHANNELS"
-            echo "# Updated Channels: $UPDATED_CHANNELS"
+            echo "# Entire: Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
             echo ""  # 👈 Blank line after header
           } > Shivansh.m3u
 
-          # Append playlist content and footer
+          # Append playlist and footer
           cat "$TMP_FILE" >> Shivansh.m3u
           echo "# ---- Created Exclusively for Shivansh Playlists ----" >> Shivansh.m3u
           echo "" >> Shivansh.m3u
@@ -92,7 +91,7 @@ jobs:
             # 🧠 Ensure latest main branch before push
             git pull --rebase origin main || true
 
-            # ✅ Safe push using GITHUB_TOKEN
+            # ✅ Safe push using GitHub token
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
           else
             echo "No changes to Shivansh.m3u"
