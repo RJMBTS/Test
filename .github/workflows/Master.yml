@@ -67,7 +67,7 @@ jobs:
           {
             echo '#EXTM3U billed-msg="Join Telegram @ShivanshPlaylists"'
             echo '# ---------------------------------------------'
-            echo '# 🔹 Shivansh Master Playlist 🔹'
+            echo '# 🔹 $P Exclusive (Shivansh) 🔹'
             echo '# Pushed & Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
