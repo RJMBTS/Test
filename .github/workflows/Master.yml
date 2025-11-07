@@ -56,7 +56,6 @@ jobs:
 
           # ✅ Header for $P Exclusive (Shivansh)
           {
-            echo "# For Shivansh Exclusive"
             echo '# Pushed and Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
