@@ -1,4 +1,5 @@
 name: Shivansh Master Playlist
+
 on:
   schedule:
     - cron: "*/15 * * * *"   # Runs every 15 minutes
@@ -45,17 +46,20 @@ jobs:
             fi
           done < sources.txt
 
+          # Replace ygxworld branding with Shivansh branding
+          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://t.me/ShivanshPlaylists",by @Shivansh|g' "$TMP_FILE"
+
           # Count total and updated channels
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
           UPDATED_CHANNELS=$TOTAL_CHANNELS
 
-          # ✅ Header with “Channels”
+          # ✅ Write header with "Entire"
           {
             echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
             echo '# Pushed and Updated by Shivansh'
-            echo "# Channels : Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
+            echo "# Entire: Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
             echo ""  # 👈 Blank line after header
           } > Shivansh.m3u
 
