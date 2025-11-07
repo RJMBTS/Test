@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: shivansh-m3u
-  cancel-in-progress: true
+  cancel-in-progress: false   # ✅ Queue new runs instead of canceling
 
 jobs:
   build:
@@ -34,15 +34,16 @@ jobs:
             echo '# Pushed and Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
+            echo ""
           } > Shivansh.m3u
 
           echo "Merging playlists from $(wc -l < sources.txt) sources..."
           cat sources.txt
 
-          # Merge playlists cleanly
+          # Merge playlists cleanly (no Begin/End or error logs)
           while IFS= read -r url; do
-            url="${url%%#*}"                      # Strip comments
-            url="$(echo -n "$url" | tr -d '\r')"  # Clean CR
+            url="${url%%#*}"
+            url="$(echo -n "$url" | tr -d '\r')"
             if [ -n "$url" ]; then
               echo "Fetching: $url"
               curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> Shivansh.m3u
@@ -63,7 +64,7 @@ jobs:
           echo "✅ Total Channels Found: $CHANNEL_COUNT"
           echo "✅ Playlist Updated at: $TIME_IST"
 
-          # Export outputs for commit message
+          # Export outputs for later use
           echo "count=$CHANNEL_COUNT" >> $GITHUB_OUTPUT
           echo "time=$TIME_IST" >> $GITHUB_OUTPUT
 
@@ -83,10 +84,10 @@ jobs:
           if ! git diff --quiet --cached; then
             git commit -m "Auto-update Shivansh.m3u [${{ steps.combine.outputs.time }}] | Channels: ${{ steps.combine.outputs.count }}"
             
-            # 🧠 Ensure latest main branch to prevent push conflicts
+            # 🧠 Ensure latest main branch before push
             git pull --rebase origin main || true
 
-            # ✅ Push changes safely
+            # ✅ Safe push using GITHUB_TOKEN
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
           else
             echo "No changes to Shivansh.m3u"
