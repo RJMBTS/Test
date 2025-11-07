@@ -28,44 +28,49 @@ jobs:
         run: |
           TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
 
-          # Initialize M3U file with header
-          {
-            echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
-            echo '# Pushed and Updated by Shivansh'
-            echo '# Coded & Scripted by Kittujk'
-            echo "# Last updated: $TIME_IST"
-            echo ""
-          } > Shivansh.m3u
+          # Create temporary working file
+          TMP_FILE="Shivansh_temp.m3u"
+          > "$TMP_FILE"
 
           echo "Merging playlists from $(wc -l < sources.txt) sources..."
           cat sources.txt
 
-          # Merge playlists cleanly (no Begin/End or error logs)
+          # Fetch and merge all URLs
           while IFS= read -r url; do
             url="${url%%#*}"
             url="$(echo -n "$url" | tr -d '\r')"
             if [ -n "$url" ]; then
               echo "Fetching: $url"
-              curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> Shivansh.m3u
-              echo "" >> Shivansh.m3u
+              curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> "$TMP_FILE"
+              echo "" >> "$TMP_FILE"
             fi
           done < sources.txt
 
-          # Count total channels
-          CHANNEL_COUNT=$(grep -c '^#EXTINF' Shivansh.m3u || true)
+          # Count total and unique channels
+          TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
+          UPDATED_CHANNELS=$TOTAL_CHANNELS
 
+          # ✅ Write header with total + updated counts
           {
-            echo ""
-            echo "# ---- Created Exclusively for Shivansh Playlists ----"
-            echo "# Total Channels: $CHANNEL_COUNT"
-            echo "# Last Updated: $TIME_IST"
-          } >> Shivansh.m3u
+            echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
+            echo '# Pushed and Updated by Shivansh'
+            echo '# Coded & Scripted by Kittujk'
+            echo "# Last updated: $TIME_IST"
+            echo "# Total Channels: $TOTAL_CHANNELS"
+            echo "# Updated Channels: $UPDATED_CHANNELS"
+            echo ""  # 👈 Blank line after header
+          } > Shivansh.m3u
 
-          echo "✅ Total Channels Found: $CHANNEL_COUNT"
+          # Append playlist content and footer
+          cat "$TMP_FILE" >> Shivansh.m3u
+          echo "# ---- Created Exclusively for Shivansh Playlists ----" >> Shivansh.m3u
+          echo "" >> Shivansh.m3u
+
+          echo "✅ Total Channels Found: $TOTAL_CHANNELS"
           echo "✅ Playlist Updated at: $TIME_IST"
 
-          # Export outputs for later use
-          echo "count=$CHANNEL_COUNT" >> $GITHUB_OUTPUT
+          # Export for commit message
+          echo "count=$TOTAL_CHANNELS" >> $GITHUB_OUTPUT
           echo "time=$TIME_IST" >> $GITHUB_OUTPUT
 
       - name: Show output size
