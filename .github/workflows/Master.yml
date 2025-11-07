@@ -47,7 +47,7 @@ jobs:
           done < sources.txt
 
           # Replace ygxworld branding with Shivansh branding
-          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://t.me/ShivanshPlaylists",by @Shivansh|g' "$TMP_FILE"
+          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg",by @Shivansh|g' "$TMP_FILE"
 
           # Count total and updated channels
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
