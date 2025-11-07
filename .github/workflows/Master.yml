@@ -2,65 +2,77 @@ name: Shivansh Master Playlist
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # Runs every 15 minutes
+    - cron: "*/15 * * * *"  # Runs every 15 minutes
   workflow_dispatch:
 
 concurrency:
   group: shivansh-m3u
-  cancel-in-progress: false   # ✅ Queue new runs instead of canceling
+  cancel-in-progress: false  # ✅ Queue jobs, don't cancel in-progress
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # 🧩 Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # 🧩 Normalize sources.txt
       - name: Normalize sources.txt
         run: dos2unix sources.txt || true
 
+      # 🧩 Combine and generate M3U playlist
       - name: Combine M3U files
         id: combine
         shell: bash
         run: |
+          set -euo pipefail
           TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
-
-          # Temporary working file
           TMP_FILE="Shivansh_temp.m3u"
           > "$TMP_FILE"
 
-          echo "Merging playlists from $(wc -l < sources.txt) sources..."
-          cat sources.txt
+          echo "🕒 Starting merge at $TIME_IST"
+          echo "📦 Sources loaded: $(wc -l < sources.txt)"
 
-          # Fetch and merge all URLs
+          # Random delay to prevent collisions
+          sleep $((RANDOM % 60))
+
+          # Fetch & validate each source
           while IFS= read -r url; do
             url="${url%%#*}"
             url="$(echo -n "$url" | tr -d '\r')"
-            if [ -n "$url" ]; then
-              echo "Fetching: $url"
-              curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> "$TMP_FILE"
+            [ -z "$url" ] && continue
+
+            echo "🔗 Fetching: $url"
+            if curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" | grep -q "#EXTM3U"; then
+              curl -sL "$url" >> "$TMP_FILE"
               echo "" >> "$TMP_FILE"
+            else
+              echo "⚠️ Invalid or empty M3U: $url" >> invalid_sources.log
             fi
           done < sources.txt
 
-          # Replace ygxworld branding with Shivansh branding
-          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://t.me/ShivanshPlaylists",by @Shivansh|g' "$TMP_FILE"
+          # Branding replacement
+          sed -i -E 's|tvg-logo="[^"]*",by *@[Yy]gxworld|tvg-logo="https://t.me/ShivanshPlaylists",by @Shivansh|g' "$TMP_FILE"
 
-          # Count total and updated channels
+          # Count channels
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
           UPDATED_CHANNELS=$TOTAL_CHANNELS
 
-          # ✅ Write header with "Entire"
+          # Create header
           {
-            echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
-            echo '# Pushed and Updated by Shivansh'
+            echo '#EXTM3U billed-msg="Join Telegram @ShivanshPlaylists"'
+            echo '# ---------------------------------------------'
+            echo '# 🔹 Shivansh Master Playlist 🔹'
+            echo '# Pushed & Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
-            echo "# Entire: Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
-            echo ""  # 👈 Blank line after header
+            echo "# Channels: Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
+            echo '# ---------------------------------------------'
+            echo ""
           } > Shivansh.m3u
 
           # Append playlist and footer
@@ -71,13 +83,24 @@ jobs:
           echo "✅ Total Channels Found: $TOTAL_CHANNELS"
           echo "✅ Playlist Updated at: $TIME_IST"
 
-          # Export for commit message
+          # Export data for commit message
           echo "count=$TOTAL_CHANNELS" >> $GITHUB_OUTPUT
           echo "time=$TIME_IST" >> $GITHUB_OUTPUT
 
-      - name: Show output size
-        run: ls -lh Shivansh.m3u || true
+      # 🧾 Display file size
+      - name: Show output details
+        run: |
+          du -h Shivansh.m3u || true
+          [ -f invalid_sources.log ] && echo "⚠️ Invalid Sources:" && cat invalid_sources.log || echo "✅ All sources valid."
 
+      # 💾 Upload artifact backup
+      - name: Upload Shivansh.m3u artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Shivansh-Playlist
+          path: Shivansh.m3u
+
+      # 🧠 Commit and push if changed
       - name: Commit and push changes
         shell: bash
         env:
@@ -87,15 +110,16 @@ jobs:
           git config user.name "$GIT_AUTHOR_NAME"
           git config user.email "$GIT_AUTHOR_EMAIL"
 
-          git add Shivansh.m3u
+          git add Shivansh.m3u || true
           if ! git diff --quiet --cached; then
+            echo "📜 Committing updated playlist..."
             git commit -m "Auto-update Shivansh.m3u [${{ steps.combine.outputs.time }}] | Channels: ${{ steps.combine.outputs.count }}"
-            
-            # 🧠 Ensure latest main branch before push
+
+            # Ensure main branch sync before push
             git pull --rebase origin main || true
 
-            # ✅ Safe push using GitHub token
+            # Push changes using GitHub Token
             git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
           else
-            echo "No changes to Shivansh.m3u"
+            echo "ℹ️ No changes detected in Shivansh.m3u"
           fi
