@@ -44,11 +44,11 @@ jobs:
           done < sources.txt
 
           # ✅ Replace old ygxworld credits with Shivansh credits
-          sed -i 's|#EXTINF:-1 tvg-id="12321" group-title="Movies" tvg-logo="https://t.me/ygxworld",by @ygxworld|#EXTINF:-1 tvg-id="1" group-title="Credits" tvg-logo="https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg",by @Shivansh|g' "$TMP_FILE"
+          sed -i 's|#EXTINF:-1 tvg-id="12321" group-title="Movies" tvg-logo="https://t.me/ygxworld",by @ygxworld|#EXTINF:-1 tvg-id="1" group-title="Credits" tvg-logo="https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg",@Shivansh|g' "$TMP_FILE"
           echo "✅ Credits updated successfully for $P Exclusive (Shivansh)"
 
           # ✅ Replace all general branding too
-          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg",by @Shivansh|g' "$TMP_FILE"
+          sed -i 's|tvg-logo="https://t.me/ygxworld",by @ygxworld|tvg-logo="https://i.postimg.cc/MZftPYPB/IMG-20250710-192112-387.jpg", @Shivansh|g' "$TMP_FILE"
 
           # Count total and updated channels
           TOTAL_CHANNELS=$(grep -c '^#EXTINF' "$TMP_FILE" || true)
@@ -56,7 +56,7 @@ jobs:
 
           # ✅ Header for $P Exclusive (Shivansh)
           {
-            echo "# Shivansh Exclusive"
+            echo "# For Shivansh Exclusive"
             echo '# Pushed and Updated by Shivansh'
             echo '# Coded & Scripted by Kittujk'
             echo "# Last updated: $TIME_IST"
