@@ -22,22 +22,21 @@ jobs:
       - name: Combine M3U files
         shell: bash
         run: |
-          # Generate current IST timestamp
+          # Generate dynamic timestamp (IST)
           TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
 
-          # Create new M3U file with header
-          cat <<EOF > Shivansh.m3u
+          # Write header with Shivansh branding
+          cat << 'EOF' > Shivansh.m3u
 #EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"
 # Pushed and Updated by Shivansh
 # Coded & Scripted by Kittujk
 # Last updated: $TIME_IST
 EOF
 
-          # Combine all M3U sources from sources.txt
+          # Combine all M3U sources
           while IFS= read -r url; do
-            url="${url%%#*}"                       # Strip inline comments
+            url="${url%%#*}"                       # Remove inline comments
             url="$(echo -n "$url" | tr -d '\r')"   # Remove carriage returns
-
             if [ -n "$url" ]; then
               echo -e "\n# ---- Begin: $url ----" >> Shivansh.m3u
               curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> Shivansh.m3u \
@@ -46,10 +45,11 @@ EOF
             fi
           done < sources.txt
 
-          # Add footer
+          # Add branded footer
           echo "# ---- Created Exclusively for Shivansh Playlists ----" >> Shivansh.m3u
 
       - name: Show output size (diagnostic)
+        shell: bash
         run: |
           echo "✅ Generated file:"
           ls -lh Shivansh.m3u || true
@@ -58,12 +58,11 @@ EOF
         env:
           GIT_AUTHOR_NAME: "GitHub Actions Bot"
           GIT_AUTHOR_EMAIL: "actions@github.com"
+        shell: bash
         run: |
           git config user.name "$GIT_AUTHOR_NAME"
           git config user.email "$GIT_AUTHOR_EMAIL"
-
           git add Shivansh.m3u
-
           # Commit only if file changed
           if ! git diff --quiet --cached; then
             git commit -m "Auto-update Shivansh.m3u"
@@ -71,4 +70,3 @@ EOF
           else
             echo "No changes to Shivansh.m3u"
           fi
-          
