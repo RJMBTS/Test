@@ -53,7 +53,7 @@ jobs:
           {
             echo '#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"'
             echo '# Pushed and Updated by Shivansh'
-            echo "# Entire: Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
+            echo "# Channels : Total - $TOTAL_CHANNELS | Updated - $UPDATED_CHANNELS"
             echo "# Last updated: $TIME_IST"
             echo '# Coded & Scripted by Kittujk'
             echo ""  # 👈 Blank line after header
