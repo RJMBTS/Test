@@ -1,9 +1,7 @@
 #EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"
 # Pushed and Updated by Shivansh
 # Coded & Scripted by Kittujk
-# Last updated: 2025-11-07 09:02:37 IST
-
-# ---- Begin: https://raw.githubusercontent.com/alex8875/m3u/main/jstar.m3u ----
+# Last updated: 2025-11-07 09:12:47 IST
 #EXTM3U
 #EXTM3U x-tvg-url="https://avkb.short.gy/jioepg.xml.gz"
 
@@ -5244,10 +5242,6 @@ https://jiotvpllive.cdn.jio.com/bpk-tv/Bharat_Express_BTS/output/index.mpd?__hdn
 https://jiotvpllive.cdn.jio.com/bpk-tv/One_Paschima_BTS/output/index.mpd?__hdnea__=st=1762476263~exp=1762562663~acl=/*~hmac=c4c342d2eee37b95d87aa23347e3e618d9c8a086855d405c98e94f86d63e2e25&xxx=%7Ccookie=__hdnea__=st=1762476263~exp=1762562663~acl=/*~hmac=c4c342d2eee37b95d87aa23347e3e618d9c8a086855d405c98e94f86d63e2e25
 
 
-# ---- End: https://raw.githubusercontent.com/alex8875/m3u/main/jstar.m3u ----
-
-
-# ---- Begin: https://raw.githubusercontent.com/alex8875/m3u/main/z5.m3u ----
 #EXTM3U
 #EXTINF:-1 tvg-id="0-9-aajtak" group-title="News" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Aaj_Tak.png",Aaj Tak
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 ygx/69.1 Safari/537.36
@@ -5454,10 +5448,6 @@ https://z5ak-cmaflive.zee5.com/cmaf/live/2105538/ZeeTalkiesELE/master.m3u8?hdntl
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 ygx/69.1 Safari/537.36
 https://aasthaott.akamaized.net/110923/smil:aasthatv.smil/playlist.m3u8?hdntl=exp=1762565257~acl=%2f*~id=96c2868c-7556-4712-899f-d967a17f77b9~data=hdntl~hmac=aa4b4548a58ee86c7024c05420a227c8e111f871acafcd8690af87eaa64d0fb2
 
-# ---- End: https://raw.githubusercontent.com/alex8875/m3u/main/z5.m3u ----
-
-
-# ---- Begin: https://raw.githubusercontent.com/alex8875/m3u/main/jcinema.m3u ----
 #EXTM3U
 
 #EXTINF:-1 tvg-id="144" group-title="Entertainment" tvg-logo="https://v3img.voot.com/resizeMedium,w_1090,h_613/v3Storage/assets/colors-hindi--16x9-1714557869344.jpg",Colors HD
@@ -5748,6 +5738,7 @@ https://jcevents.hotstar.com/bpk-tv/News18_UP_Uttarakhand_voot_MOB/Fallback/News
 https://jcevents.hotstar.com/bpk-tv/News18_Urdu_voot_MOB/Fallback/News18_Urdu_voot_MOB.m3u8
 
 
-# ---- End: https://raw.githubusercontent.com/alex8875/m3u/main/jcinema.m3u ----
 
 # ---- Created Exclusively for Shivansh Playlists ----
+# Total Channels: 857
+# Last Updated: 2025-11-07 09:12:47 IST
