@@ -21,18 +21,31 @@ jobs:
 
       - name: Combine M3U files
         run: |
-          echo "#EXTM3U" > Shivansh.m3u
+          # Generate dynamic timestamp (IST)
+          TIME_IST=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S IST")
+
+          # Write header with Shivansh branding
+          cat <<EOF > Shivansh.m3u
+#EXTM3U billed-msg="Join Telegram @ ShivanshPlaylists"
+# Pushed and Updated by Shivansh
+# Coded & Scripted by Kittujk
+# Last updated: $TIME_IST
+EOF
+
+          # Combine all M3U sources
           while IFS= read -r url; do
-            url="${url%%#*}"                       # Remove comments after URLs
+            url="${url%%#*}"                       # Remove inline comments
             url="$(echo -n "$url" | tr -d '\r')"   # Remove carriage returns
             if [ -n "$url" ]; then
               echo -e "\n# ---- Begin: $url ----" >> Shivansh.m3u
-              # Fetch playlist; retry if needed, log error on fail
               curl -sL --max-time 30 --retry 3 --retry-delay 5 "$url" >> Shivansh.m3u \
                 || echo -e "\n# Failed to fetch $url" >> Shivansh.m3u
               echo -e "\n# ---- End: $url ----\n" >> Shivansh.m3u
             fi
           done < sources.txt
+
+          # Add branded footer
+          echo "# ---- Created Exclusively for Shivansh Playlists ----" >> Shivansh.m3u
 
       - name: Show output size (diagnostic)
         run: ls -lh Shivansh.m3u || true
