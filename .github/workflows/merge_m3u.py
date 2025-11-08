@@ -1,27 +1,33 @@
-import yaml, datetime, os, pytz
+import yaml, datetime, os, pytz, re
 
 # Load configuration
 with open("m3u_merge_config.yml", "r", encoding="utf-8") as f:
     config = yaml.safe_load(f)
 
-# --- Read creds.txt sources ---
+# Load creds.txt sources
 sources = []
 with open(config["settings"]["source_list"], "r", encoding="utf-8") as f:
     for line in f:
-        path = line.strip()
-        if path and os.path.exists(path):
-            sources.append(path)
+        src = line.strip()
+        if src and os.path.exists(src):
+            sources.append(src)
 
 if not sources:
     print("❌ No valid sources found in creds.txt.")
     exit(1)
 
-# --- Collect channels & remove duplicates ---
+# Collect channels and remove duplicates
 seen = set()
 channels = []
+source_counts = {}
+
 for src in sources:
+    name = os.path.splitext(os.path.basename(src))[0]  # e.g., z5.m3u → z5
+    count_before = len(channels)
+
     with open(src, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
+
     for i in range(len(lines)):
         if lines[i].startswith("#EXTINF"):
             url = lines[i + 1].strip() if i + 1 < len(lines) else ""
@@ -30,14 +36,17 @@ for src in sources:
                 seen.add(key)
                 channels.append((lines[i].strip(), url))
 
-# --- Time setup (IST) ---
+    # count channels added from this source
+    source_counts[name.upper()] = len(channels) - count_before
+
+# Time setup (IST)
 ist = pytz.timezone("Asia/Kolkata")
 now = datetime.datetime.now(ist)
 timestamp = now.strftime("%Y-%m-%d %H:%M IST")
 next_update = (now + datetime.timedelta(minutes=config["settings"]["update_interval"])).strftime("%Y-%m-%d %H:%M IST")
 hour = now.hour
 
-# --- Determine greeting and emojis ---
+# Determine greeting + matching footer
 if 6 <= hour < 12:
     greet = ("☀️ Good Morning, RJM Viewers!", "☀️ Start your Day with RJM Tv 📺")
 elif 12 <= hour < 16:
@@ -47,11 +56,15 @@ elif 16 <= hour < 18:
 else:
     greet = ("🌙 Good Night, RJM Viewers!", "🌙 Late Night with RJM Tv 📺")
 
-# --- Stats ---
-total = len(channels)
-updated = total
+# Build per-source summary line
+summary_parts = [f"📺 {name} ➜ {count}" for name, count in source_counts.items()]
+source_summary = " | ".join(summary_parts)
 
-# --- Build header ---
+# Stats
+total = len(channels)
+updated = total  # Treat all as updated for now
+
+# Build header
 header = f"""#EXTM3U billed-msg="RJM Tv - RJMBTS Network"
 # =========================================================
 # {greet[0]}
@@ -61,11 +74,11 @@ header = f"""#EXTM3U billed-msg="RJM Tv - RJMBTS Network"
 # 🔁 Next update     : {next_update}
 # 📊 Channels : Total - {total} | Updated - {updated}
 # ---------------------------------------------------------
-# 📺 Sources: {len(sources)} file(s)
+# {source_summary}
 # =========================================================
 """
 
-# --- Build footer ---
+# Footer
 footer = f"""
 # =========================================================
 # {greet[1]}
@@ -73,7 +86,7 @@ footer = f"""
 # =========================================================
 """
 
-# --- Write Master.m3u ---
+# Write Master.m3u
 out_path = config["settings"]["output_file"]
 with open(out_path, "w", encoding="utf-8") as f:
     f.write(header)
@@ -81,4 +94,6 @@ with open(out_path, "w", encoding="utf-8") as f:
         f.write(f"{extinf}\n{url}\n")
     f.write(footer)
 
-print(f"✅ Master.m3u generated with {total} channels at {timestamp}")
+print(f"✅ Master.m3u generated successfully with {total} channels at {timestamp}")
+for src, count in source_counts.items():
+    print(f"   📺 {src}: {count} channels")
