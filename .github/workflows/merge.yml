@@ -1,9 +1,9 @@
-name: RJM Master.m3u Auto Generator
+name: RJM Master Playlist Auto Generator
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes
-  workflow_dispatch:          # allows manual run from GitHub Actions tab
+    - cron: "*/15 * * * *"    # every 15 minutes
+  workflow_dispatch:           # manual run
 
 jobs:
   build:
@@ -18,16 +18,15 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml pytz
 
-      - name: Run M3U merge
-        run: |
-          python3 .github/workflows/merge_m3u.py
-          
+      - name: Run RJM M3U Merge
+        run: python3 .github/workflows/merge_m3u.py
+
       - name: Commit and push Master.m3u
         run: |
           git config --global user.name "RJM AutoBot"
           git config --global user.email "actions@github.com"
-          git add Master.m3u
-          git commit -m "🔁 Auto update Master.m3u"
+          git add Master.m3u || true
+          git diff --cached --quiet || git commit -m "🔁 Auto update Master.m3u"
           git push
