@@ -1,16 +1,25 @@
-import yaml, datetime, os, pytz, re
+import yaml, datetime, os, pytz, re, requests
 
 # Load configuration
-with open("m3u_merge_config.yml", "r", encoding="utf-8") as f:
+config_path = os.path.join(os.path.dirname(__file__), "m3u_merge_config.yml")
+with open(config_path, "r", encoding="utf-8") as f:
     config = yaml.safe_load(f)
 
-# Load creds.txt sources
+# Load sources from creds.txt
 sources = []
 with open(config["settings"]["source_list"], "r", encoding="utf-8") as f:
     for line in f:
         src = line.strip()
-        if src and os.path.exists(src):
+        if not src:
+            continue
+        # Remote URLs
+        if src.startswith("http://") or src.startswith("https://"):
             sources.append(src)
+        # Local files
+        elif os.path.exists(src):
+            sources.append(src)
+        else:
+            print(f"⚠️ Skipping invalid source: {src}")
 
 if not sources:
     print("❌ No valid sources found in creds.txt.")
@@ -22,12 +31,22 @@ channels = []
 source_counts = {}
 
 for src in sources:
-    name = os.path.splitext(os.path.basename(src))[0]  # e.g., z5.m3u → z5
+    name = os.path.splitext(os.path.basename(src))[0].upper()  # e.g., z5.m3u -> Z5
+    print(f"🔹 Processing: {name}")
+
+    try:
+        if src.startswith("http://") or src.startswith("https://"):
+            response = requests.get(src, timeout=15)
+            response.raise_for_status()
+            lines = response.text.splitlines()
+        else:
+            with open(src, "r", encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+    except Exception as e:
+        print(f"⚠️ Failed to load {src}: {e}")
+        continue
+
     count_before = len(channels)
-
-    with open(src, "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.readlines()
-
     for i in range(len(lines)):
         if lines[i].startswith("#EXTINF"):
             url = lines[i + 1].strip() if i + 1 < len(lines) else ""
@@ -36,8 +55,7 @@ for src in sources:
                 seen.add(key)
                 channels.append((lines[i].strip(), url))
 
-    # count channels added from this source
-    source_counts[name.upper()] = len(channels) - count_before
+    source_counts[name] = len(channels) - count_before
 
 # Time setup (IST)
 ist = pytz.timezone("Asia/Kolkata")
@@ -46,7 +64,7 @@ timestamp = now.strftime("%Y-%m-%d %H:%M IST")
 next_update = (now + datetime.timedelta(minutes=config["settings"]["update_interval"])).strftime("%Y-%m-%d %H:%M IST")
 hour = now.hour
 
-# Determine greeting + matching footer
+# Greeting logic
 if 6 <= hour < 12:
     greet = ("☀️ Good Morning, RJM Viewers!", "☀️ Start your Day with RJM Tv 📺")
 elif 12 <= hour < 16:
@@ -56,15 +74,15 @@ elif 16 <= hour < 18:
 else:
     greet = ("🌙 Good Night, RJM Viewers!", "🌙 Late Night with RJM Tv 📺")
 
-# Build per-source summary line
+# Build source summary line
 summary_parts = [f"📺 {name} ➜ {count}" for name, count in source_counts.items()]
 source_summary = " | ".join(summary_parts)
 
 # Stats
 total = len(channels)
-updated = total  # Treat all as updated for now
+updated = total
 
-# Build header
+# Header
 header = f"""#EXTM3U billed-msg="RJM Tv - RJMBTS Network"
 # =========================================================
 # {greet[0]}
