@@ -1,15 +1,16 @@
-name: RJM Master Playlist Auto Generator
+name: RJM Master.m3u Auto Generator
 
 on:
   schedule:
-    - cron: "*/15 * * * *"    # every 15 minutes
-  workflow_dispatch:           # manual run
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch:          # allows manual trigger
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -18,9 +19,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install pyyaml pytz
+        run: pip install pyyaml pytz requests
 
-      - name: Run RJM M3U Merge
+      - name: Run RJM M3U Merge Script
         run: python3 .github/workflows/merge_m3u.py
 
       - name: Commit and push Master.m3u
