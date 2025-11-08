@@ -1,4 +1,4 @@
-name: RJM Master.m3u Auto Generator + GitHub Pages Deploy
+name: Master Generator
 
 on:
   schedule:
