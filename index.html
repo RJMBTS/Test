@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RJM Tv – Master.m3u</title>
+<style>
+  body {
+    font-family:'Segoe UI',Arial,sans-serif;
+    background:#d8c9ff;
+    color:#222;
+    text-align:center;
+    padding:2rem;
+  }
+  h1{font-size:2rem;margin-bottom:.5rem}
+  .stats{margin-top:1rem;font-size:1.1rem}
+  .sources{margin-top:1rem;background:rgba(255,255,255,.7);
+           padding:.5rem 1rem;border-radius:8px;display:inline-block}
+  .footer{margin-top:2rem;font-size:.9rem;color:#555}
+  a.download{display:inline-block;margin-top:1.5rem;background:#222;color:#fff;
+             padding:.6rem 1.2rem;border-radius:6px;text-decoration:none}
+  #timer,#clock{font-weight:bold}
+</style>
+<script>
+let seconds=60;
+function countdown(){
+  document.getElementById('timer').textContent='⏱ Refreshing in '+seconds+' s';
+  seconds--;
+  if(seconds<0)location.reload();
+}
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent='🕒 Current Time: '+now.toLocaleTimeString('en-IN',{
+    hour12:false,timeZone:'Asia/Kolkata'
+  })+' IST';
+}
+setInterval(countdown,1000);
+setInterval(updateClock,1000);
+window.onload=function(){countdown();updateClock();};
+</script>
+</head>
+<body>
+  <h1>🌙 Good Night, RJM Viewers!</h1>
+  <div class="stats">
+    <p>🕒 Last updated on <b>2025-11-08 21:45 IST</b></p>
+    <p>🔁 Next update <b>2025-11-08 22:00 IST</b></p>
+    <p id="clock"></p>
+    <p>📊 Total channels <b>857</b></p>
+  </div>
+  <div class="sources">📺 JSTAR ➜ 748 | 📺 Z5 ➜ 68 | 📺 JCINEMA ➜ 41</div>
+  <br>
+  <a class="download" href="Master.m3u">📥 Download Master.m3u</a>
+  <div id="timer" style="margin-top:1rem;"></div>
+  <div class="footer">
+    <p>🌙 Late Night with RJM Tv 📺</p>
+    <p>⚡ Powered by <b>RJMBTS</b> ⚡</p>
+  </div>
+</body>
+</html>
