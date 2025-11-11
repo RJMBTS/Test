@@ -1,0 +1,14 @@
+# 🔹 Auto Updated by RJMBTS
+# 🔸 Maintained by STGLOC Network
+# 🕒 Last updated: 2025-11-12 00:56:01 IST
+
+#EXTM3U billed-msg="STGLOC Network - RJMBTS Automation"
+
+#EXTINF:-1 channel-id="IN4900003U3-in" tvg-id="IN4900003U3" tvg-chno="1003" tvg-name="ETV Comedy" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900003U3_20250811T033449SQUARE.png" group-title="ETv",ETV Comedy
+https://jmp2.uk/stvp-IN4900003U3.m3u8
+#EXTINF:-1 channel-id="IN4900004LP-in" tvg-id="IN4900004LP" tvg-chno="1128" tvg-name="ETV Josh" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900004LP_20250811T033452SQUARE.png" group-title="ETv",ETV Josh
+https://jmp2.uk/stvp-IN4900004LP.m3u8
+#EXTINF:-1 channel-id="IN4900002RV-in" tvg-id="IN4900002RV" tvg-chno="1456" tvg-name="ETV Music" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900002RV_20250811T033455SQUARE.png" group-title="ETv",ETV Music
+https://jmp2.uk/stvp-IN4900002RV.m3u8
+#EXTINF:-1 channel-id="IN4900001AQ-in" tvg-id="IN4900001AQ" tvg-chno="1095" tvg-name="ETV News" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900001AQ_20250811T033458SQUARE.png" group-title="ETv",ETV News
+https://jmp2.uk/stvp-IN4900001AQ.m3u8
