@@ -4,4 +4,4 @@
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.stream_selection_type=adaptive
 #KODIPROP:inputstream.adaptive.license_type=clearkey
-https://z5ak-cmaflive.zee5.com/cmaf/live/2105540/ZeeCinemaHDELE/index-connected.m3u8?hdntl=exp=1762911421~acl=%2f*~id=35b0175c-adbd-46f1-9ce9-ce31ae2a548f~data=hdntl~hmac=5a9d963f96a5f349fef378e27f1d63ebd8752d41717f1267021c211e7c1eedd3
+https://z5ak-cmaflive.zee5.com/cmaf/live/2105540/ZeeCinemaHDELE/index-connected.m3u8?
