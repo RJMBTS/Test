@@ -1,0 +1,83 @@
+name: Stgloc Auto Builder 🌐
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"    # ⏰ Runs every 30 minutes
+  workflow_dispatch:
+
+concurrency:
+  group: nrtv-pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      # STEP 1️⃣: Build master stgloc.m3u
+      - name: 🧩 Build master stgloc.m3u
+        run: |
+          set -euxo pipefail
+          timestamp=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S %Z")
+          tmpdir=$(mktemp -d)
+          src="https://raw.githubusercontent.com/RJMBTS/Tlcp/refs/heads/main/scpl.m3u"
+
+          echo "🔹 Building NRTV master M3U at $timestamp"
+          curl -fSL --max-time 60 "$src" -o "$tmpdir/source.m3u"
+
+          {
+            echo "# 🔹 Auto Updated by RJMBTS"
+            echo "# 🔸 Maintained by NRTV Network"
+            echo "# 🕒 Last updated: $timestamp"
+            echo ""
+            echo '#EXTM3U billed-msg="NRTV Network - RJMBTS Automation"'
+            echo ""
+          } > stgloc.m3u
+
+          echo "🎯 Cleaning and converting URLs to .m3u8..."
+          grep -v '^#EXTM3U' "$tmpdir/source.m3u" > "$tmpdir/source_clean.m3u" || true
+          sed -i -E '/^https?:\/\//s#($|\?.*)#.m3u8#' "$tmpdir/source_clean.m3u"
+
+          echo "🧹 Deduplicating and numbering channels..."
+          awk '
+            BEGIN { ch=0 }
+            /^#EXTINF/ {
+              info=$0
+              getline url
+              if (url == "") next
+              gsub(/[[:space:]]+$/, "", url)
+              if (!(info in seen_info) && !(url in seen_url)) {
+                seen_info[info]=1
+                seen_url[url]=1
+                ch++
+                if (info !~ /tvg-chno=/) {
+                  sub(/^#EXTINF:-1/, sprintf("#EXTINF:-1 tvg-chno=\"%d\"", ch), info)
+                }
+                print info
+                print url
+              }
+            }
+          ' "$tmpdir/source_clean.m3u" >> stgloc.m3u
+
+          total=$(grep -c '^#EXTINF' stgloc.m3u || echo 0)
+          echo "✅ Master playlist built — $total channels."
+
+      # STEP 2️⃣: Generate per-channel .m3u8 files
+      - name: 🧩 Generate individual .m3u8 files from stgloc.m3u
+        run: |
+          set -euxo pipefail
+          echo "🎯 Generating .m3u8 files from stgloc.m3u ..."
+          rm -f *.m3u8 || true
+
+          awk '
+            /^#EXTINF/ {
+              info=$0
+              getline url
+              if (url ~ /^https?:\/\//) {
