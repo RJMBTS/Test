@@ -1,7 +1,0 @@
-#EXTM3U
-#EXTINF:-1 tvg-id="0-9-9z5398771" group-title="Kannada" tvg-logo="https://jiotvimages.cdn.jio.com/dare_images/images/Aastha_Kannada.png",Aastha Kannada
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 ygx/69.1 Safari/537.36
-#KODIPROP:inputstream.adaptive.manifest_type=hls
-#KODIPROP:inputstream.adaptive.stream_selection_type=adaptive
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-https://aasthaott.akamaized.net/110923/smil:aasthakannada.smil/playlist.m3u8?
