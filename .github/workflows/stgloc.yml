@@ -1,12 +1,12 @@
-name: Stgloc Auto Builder 🌐
+name: STGLOC Auto Builder 🌐
 
 on:
   schedule:
-    - cron: "*/30 * * * *"    # ⏰ Runs every 30 minutes
+    - cron: "*/30 * * * *"    # ⏰ Auto runs every 30 minutes
   workflow_dispatch:
 
 concurrency:
-  group: nrtv-pipeline
+  group: stgloc-pipeline
   cancel-in-progress: false
 
 permissions:
@@ -23,25 +23,26 @@ jobs:
 
       # STEP 1️⃣: Build master stgloc.m3u
       - name: 🧩 Build master stgloc.m3u
+        id: build
         run: |
           set -euxo pipefail
           timestamp=$(TZ="Asia/Kolkata" date +"%Y-%m-%d %H:%M:%S %Z")
           tmpdir=$(mktemp -d)
           src="https://raw.githubusercontent.com/RJMBTS/Tlcp/refs/heads/main/scpl.m3u"
 
-          echo "🔹 Building NRTV master M3U at $timestamp"
+          echo "🔹 Building STGLOC master M3U at $timestamp"
           curl -fSL --max-time 60 "$src" -o "$tmpdir/source.m3u"
 
           {
             echo "# 🔹 Auto Updated by RJMBTS"
-            echo "# 🔸 Maintained by NRTV Network"
+            echo "# 🔸 Maintained by STGLOC Network"
             echo "# 🕒 Last updated: $timestamp"
             echo ""
-            echo '#EXTM3U billed-msg="NRTV Network - RJMBTS Automation"'
+            echo '#EXTM3U billed-msg="STGLOC Network - RJMBTS Automation"'
             echo ""
           } > stgloc.m3u
 
-          echo "🎯 Cleaning and converting URLs to .m3u8..."
+          echo "🎯 Cleaning and converting URLs..."
           grep -v '^#EXTM3U' "$tmpdir/source.m3u" > "$tmpdir/source_clean.m3u" || true
           sed -i -E '/^https?:\/\//s#($|\?.*)#.m3u8#' "$tmpdir/source_clean.m3u"
 
@@ -67,17 +68,79 @@ jobs:
           ' "$tmpdir/source_clean.m3u" >> stgloc.m3u
 
           total=$(grep -c '^#EXTINF' stgloc.m3u || echo 0)
+          echo "total=$total" >> $GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
           echo "✅ Master playlist built — $total channels."
 
-      # STEP 2️⃣: Generate per-channel .m3u8 files
-      - name: 🧩 Generate individual .m3u8 files from stgloc.m3u
+      # STEP 2️⃣: Generate individual .m3u8 files
+      - name: 🧩 Generate per-channel .m3u8 files
+        id: split
         run: |
           set -euxo pipefail
           echo "🎯 Generating .m3u8 files from stgloc.m3u ..."
-          rm -f *.m3u8 || true
+          find . -maxdepth 1 -type f -name "*.m3u8" -delete || true
 
           awk '
             /^#EXTINF/ {
               info=$0
               getline url
               if (url ~ /^https?:\/\//) {
+                name=info
+                sub(/.*tvg-name="/, "", name)
+                sub(/".*/, "", name)
+                if (name == "") { name=info; sub(/.*,/, "", name) }
+                gsub(/[[:space:]]+/, "_", name)
+                gsub(/[^A-Za-z0-9_.-]/, "", name)
+                if (name == "") name="unknown"
+                if (url !~ /\.m3u8$/) url=url".m3u8"
+                file=sprintf("%s.m3u8", name)
+                print "#EXTM3U" > file
+                print info >> file
+                print url >> file
+                close(file)
+                print "✅ Created: " file
+              }
+            }
+          ' stgloc.m3u
+
+          count=$(ls *.m3u8 2>/dev/null | wc -l || echo 0)
+          echo "count=$count" >> $GITHUB_OUTPUT
+          echo "✅ $count individual .m3u8 files created."
+
+      # STEP 3️⃣: Commit and push updates
+      - name: 🚀 Commit & Push (STGLOC Auto)
+        run: |
+          set -euxo pipefail
+          git config user.name "STGLOC Auto Builder"
+          git config user.email "actions@github.com"
+          git add stgloc.m3u *.m3u8 || true
+          if git diff --cached --quiet; then
+            echo "No new updates — skipping commit."
+          else
+            git commit -m "🔄 Auto-update STGLOC master + .m3u8 files"
+            git pull --rebase origin main || git rebase --abort
+            git push origin main || echo "⚠️ Push failed, build succeeded."
+          fi
+
+      # STEP 4️⃣: Trigger Vercel rebuild (optional)
+      - name: 🔁 Trigger Vercel Deployment
+        if: success() && env.DEPLOY_HOOK != ''
+        env:
+          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          echo "🚀 Triggering Vercel rebuild for STGLOC..."
+          curl -X POST "$DEPLOY_HOOK" -H "Accept: application/json"
+
+      # STEP 5️⃣: Post summary to GitHub Actions UI
+      - name: 🧾 Build Summary
+        run: |
+          echo "## 🌐 STGLOC Auto Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------:|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📺 Total channels in stgloc.m3u | ${{ steps.build.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🎬 Individual .m3u8 files created | ${{ steps.split.outputs.count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🕒 **Last updated:** ${{ steps.build.outputs.timestamp }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔸 **Deployed at:** [nrtv.vercel.app](https://nrtv.vercel.app)" >> $GITHUB_STEP_SUMMARY
+          echo "🔹 **Maintained by:** [@RJMBTS](https://github.com/RJMBTS)" >> $GITHUB_STEP_SUMMARY
