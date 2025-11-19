@@ -1,28 +1,28 @@
 # 🔹 Auto Updated by RJMBTS
 # 🔸 Maintained by STGLOC Network
-# 🕒 Last updated: 2025-11-19 08:23:39 IST
+# 🕒 Last updated: 2025-11-19 09:11:13 IST
 
 #EXTM3U billed-msg="STGLOC Network - RJMBTS Automation"
 
-#EXTINF:-1 tvg-chno="1" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/89802/etv-plus-320x240.jpg" group-title="ETV Win",ETV Plus
-https://d2pk5pedkyu2d0.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_PLUS_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="2" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/27931/etv-cinema-320x240.jpg" group-title="ETV Win",ETV Cinema
-https://d27zlkxhgwrfgo.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_CINEMA_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="3" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/47283/etv-life-320x240.jpg" group-title="ETV Win",ETV Life
-https://d2cj1h11htct8o.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_LIFE_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="4" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/28270/etv-telugu-320x240.jpg" group-title="ETV Win",ETV Telugu
+#EXTINF:-1 tvg-chno="1" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/28270/etv-telugu-320x240.jpg" group-title="ETv",ETv Telugu
 https://d1rznlx03muoan.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_HD_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="5" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/37856/etv-abhiruchi-320x240.jpg" group-title="ETV Win",ETV Abhiruchi
+#EXTINF:-1 tvg-chno="2" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/27931/etv-cinema-320x240.jpg" group-title="ETv",ETv Cinema
+https://d27zlkxhgwrfgo.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_CINEMA_H264_cloud_in/index.m3u8.m3u8
+#EXTINF:-1 tvg-chno="3" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/47283/etv-life-320x240.jpg" group-title="ETv",ETv Life
+https://d2cj1h11htct8o.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_LIFE_H264_cloud_in/index.m3u8.m3u8
+#EXTINF:-1 tvg-chno="4" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/89802/etv-plus-320x240.jpg" group-title="ETv",ETv Plus
+https://d2pk5pedkyu2d0.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_PLUS_H264_cloud_in/index.m3u8.m3u8
+#EXTINF:-1 tvg-chno="5" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/37856/etv-abhiruchi-320x240.jpg" group-title="ETv",ETv Abhiruchi
 https://dg3721c3ez5m0.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_ABHIRUCHI_H264_cloud-in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="6" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/18492/etv-telangana-320x240.jpg" group-title="ETV Win",ETV Telangana
+#EXTINF:-1 tvg-chno="6" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/18492/etv-telangana-320x240.jpg" group-title="ETv",ETv Telangana
 https://d37d7pfp7vjqhh.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_TS_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 tvg-chno="7" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/47688/etv-andhra-pradesh-320x240.jpg" group-title="ETV Win",ETV Andhra Pradesh
+#EXTINF:-1 tvg-chno="7" tvg-id="" group-logo="https://www.etvwin.com/assets/img/logo-25.png" tvg-logo="https://etv-win-image.akamaized.net/etvwin/live/channel/47688/etv-andhra-pradesh-320x240.jpg" group-title="ETv",ETv Andhra Pradesh
 https://d1g35elx8qnif3.cloudfront.net/v1/master/9d43eacaed199f8d5883927e7aef514a8a08e108/ETV_AP_H264_cloud_in/index.m3u8.m3u8
-#EXTINF:-1 channel-id="IN4900003U3-in" tvg-id="IN4900003U3" tvg-chno="1003" tvg-name="ETV Comedy" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900003U3_20250811T033449SQUARE.png" group-title="ETv",ETV Comedy
+#EXTINF:-1 channel-id="IN4900003U3-in" tvg-id="IN4900003U3" tvg-chno="1003" tvg-name="ETV Comedy" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900003U3_20250811T033449SQUARE.png" group-title="ETv",ETv Comedy
 https://jmp2.uk/stvp-IN4900003U3.m3u8
-#EXTINF:-1 channel-id="IN4900004LP-in" tvg-id="IN4900004LP" tvg-chno="1128" tvg-name="ETV Josh" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900004LP_20250811T033452SQUARE.png" group-title="ETv",ETV Josh
+#EXTINF:-1 channel-id="IN4900004LP-in" tvg-id="IN4900004LP" tvg-chno="1128" tvg-name="ETV Josh" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900004LP_20250811T033452SQUARE.png" group-title="ETv",ETv Josh
 https://jmp2.uk/stvp-IN4900004LP.m3u8
-#EXTINF:-1 channel-id="IN4900002RV-in" tvg-id="IN4900002RV" tvg-chno="1456" tvg-name="ETV Music" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900002RV_20250811T033455SQUARE.png" group-title="ETv",ETV Music
+#EXTINF:-1 channel-id="IN4900002RV-in" tvg-id="IN4900002RV" tvg-chno="1456" tvg-name="ETV Music" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900002RV_20250811T033455SQUARE.png" group-title="ETv",ETv Music
 https://jmp2.uk/stvp-IN4900002RV.m3u8
-#EXTINF:-1 channel-id="IN4900001AQ-in" tvg-id="IN4900001AQ" tvg-chno="1095" tvg-name="ETV News" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900001AQ_20250811T033458SQUARE.png" group-title="ETv",ETV News
+#EXTINF:-1 channel-id="IN4900001AQ-in" tvg-id="IN4900001AQ" tvg-chno="1095" tvg-name="ETV News" tvg-logo="https://tvpnlogopus.samsungcloud.tv/platform/image/sourcelogo/vc/00/02/34/IN4900001AQ_20250811T033458SQUARE.png" group-title="ETv",ETv News
 https://jmp2.uk/stvp-IN4900001AQ.m3u8
